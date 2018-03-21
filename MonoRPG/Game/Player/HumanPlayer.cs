@@ -13,6 +13,9 @@ namespace MonoRPG.Desktop.Game.Player {
         public Vector2 pos;
         Vector2 velocity;
 
+        public Color Color => color;
+        public GameRPG Game => game;
+
         // Animations
         private Animation idleAnimation;
         private Animation runAnimation;
@@ -49,6 +52,12 @@ namespace MonoRPG.Desktop.Game.Player {
         private const float GRAVITY_ACCELERATION = 3400.0f;
         private const float TERMINAL_VELOCITY = 550.0f;
 
+        // movement
+        public bool CanMoveUp => pos.Y > 0;
+        public bool CanMoveDown => pos.Y + localBounds.Height < Game.graphics.GraphicsDevice.Viewport.Height;
+        public bool CanMoveLeft => pos.X > 0;
+        public bool CanMoveRight => pos.X + localBounds.Width < Game.graphics.GraphicsDevice.Viewport.Width;
+
         public HumanPlayer(Color color, GameRPG game, Vector2 pos) {
             this.color = color;
             this.game = game;
@@ -74,37 +83,28 @@ namespace MonoRPG.Desktop.Game.Player {
             localBounds = new Rectangle(left, top, width, height);
         }
 
-        public Color Color => color;
-        public GameRPG Game => game;
-
         public void Draw(GameTime gameTime) {
-            // Flip the sprite to face the way we are moving.
-            if (velocity.X > 0)
-                flip = SpriteEffects.FlipHorizontally;
-            else if (velocity.X < 0)
-                flip = SpriteEffects.None;
+            // flip to match characters movement
+            if (velocity.X > 0) flip = SpriteEffects.FlipHorizontally;
+            else if (velocity.X < 0) flip = SpriteEffects.None;
 
-            // Draw that sprite.
+            // draw character
             sprite.Draw(gameTime, game.spriteBatch, pos, flip);
         }
 
         public void Update(GameTime gameTime) {
-            // movement
-            KeyboardState state = Keyboard.GetState();
+            // update animations
             if (isAlive && !isFalling) {
-                if (Math.Abs(velocity.X) - 0.2f > 0) {
+                if (Math.Abs(velocity.X) - 0.5f > 0) {
                     sprite.PlayAnimation(runAnimation);
                 } else {
                     sprite.PlayAnimation(idleAnimation);
                 }
             }
 
-            Console.WriteLine("Pos.Y: " + pos.Y);
-            Console.WriteLine("Height: " + localBounds.Height);
-
-            ProcessInput(state);
+            // process player in the game world
+            ProcessInput(Keyboard.GetState());
             ApplyPhysics(gameTime);
-
         }
 
         public void Reset(Vector2 position) {
@@ -112,14 +112,8 @@ namespace MonoRPG.Desktop.Game.Player {
             velocity = Vector2.Zero;
             isAlive = true;
             sprite.PlayAnimation(idleAnimation);
-
             requestingJump = false;
         }
-
-        public bool CanMoveUp => pos.Y > 0;
-        public bool CanMoveDown => pos.Y + idleAnimation.Texture.Height < Game.graphics.GraphicsDevice.Viewport.Height;
-        public bool CanMoveLeft => pos.X > 0;
-        public bool CanMoveRight => pos.X + localBounds.Width < Game.graphics.GraphicsDevice.Viewport.Width;
 
         /// <summary>
         /// Gets player horizontal movement and jump commands from input.
@@ -152,6 +146,7 @@ namespace MonoRPG.Desktop.Game.Player {
                 velocity.Y = 0;
             }
 
+            // start jump
             if(requestingJump && !isFalling) {
                 velocity.Y = JUMP_LAUNCH_VELOCITY;
                 sprite.PlayAnimation(jumpAnimation);
