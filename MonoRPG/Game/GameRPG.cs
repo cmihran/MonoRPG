@@ -1,19 +1,27 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoRPG.Desktop.Game.Player;
 
 namespace MonoRPG.Desktop {
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+    public class GameRPG : Microsoft.Xna.Framework.Game {
 
-        public Game1() {
+        public GraphicsDeviceManager graphics;
+        public SpriteBatch spriteBatch;
+
+        public GameRPG() {
             graphics = new GraphicsDeviceManager(this);
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferHeight = 500;
+            graphics.PreferredBackBufferWidth = 500;
+
             Content.RootDirectory = "Content";
         }
+
+        HumanPlayer player;
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -22,9 +30,10 @@ namespace MonoRPG.Desktop {
         /// and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+
+            // TODO: Add your initialization logic here
+            player = new HumanPlayer(Color.White, this, Vector2.Zero);
         }
 
         /// <summary>
@@ -56,6 +65,7 @@ namespace MonoRPG.Desktop {
                 Exit();
 
             // TODO: Add your update logic here
+            player.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -67,7 +77,12 @@ namespace MonoRPG.Desktop {
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            spriteBatch.Begin();
+
             // TODO: Add your drawing code here
+            player.Draw(gameTime);
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

@@ -10,7 +10,7 @@ namespace MonoRPG.Desktop {
         /// </summary>
         [STAThread]
         static void Main() {
-            using (var game = new Game1())
+            using (var game = new GameRPG())
                 game.Run();
         }
     }
